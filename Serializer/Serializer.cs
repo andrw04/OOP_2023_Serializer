@@ -10,7 +10,7 @@ namespace Serializer
 {
     public static class Serializer
     {
-        public static async void SerializeJSONAsync<T>(T obj, string fileName)
+        public static async Task SerializeJSONAsync<T>(T obj, string fileName)
         {
             await Task.Run(() =>
             {
@@ -37,7 +37,7 @@ namespace Serializer
             });
         }
 
-        public static async void SerializeXMLAsync<T>(T obj, string fileName)
+        public static async Task SerializeXMLAsync<T>(T obj, string fileName)
         {
             await Task.Run(() =>
             {
@@ -61,7 +61,7 @@ namespace Serializer
             });
         }
 
-        public static async void SerializeBinAsync<T>(T obj, string fileName)
+        public static async Task SerializeBinAsync<T>(T obj, string fileName)
         {
             await Task.Run(() =>
             {
