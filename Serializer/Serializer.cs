@@ -1,23 +1,87 @@
-﻿using Newtonsoft.Json;
+﻿#pragma warning disable SYSLIB0011
+
+using Newtonsoft.Json;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
+using System.Xml.Serialization;
+
 
 namespace Serializer
 {
-    public static class Serializer<T>
+    public static class Serializer
     {
-        public static async Task<string> SerializeJSON(T obj)
+        public static async void SerializeJSONAsync<T>(T obj, string fileName)
         {
-            return await Task.Run(() =>
+            await Task.Run(() =>
             {
-                string json = JsonConvert.SerializeObject(obj);
-                return json;
+                using (FileStream fs = new FileStream(fileName, FileMode.OpenOrCreate))
+                {
+                    var json = JsonConvert.SerializeObject(obj);
+                    fs.Write(Encoding.ASCII.GetBytes(json));
+                }
             });
         }
 
-        public static async Task<T?> DeserializeJSON(string json)
+        public static async Task<T?> DeSerializeJSONAsync<T>(string fileName)
         {
             return await Task.Run(() =>
             {
-                return JsonConvert.DeserializeObject<T>(json);
+                using (FileStream fs = new FileStream(fileName, FileMode.OpenOrCreate))
+                {
+                    byte[] buffer = new byte[fs.Length];
+                    fs.Read(buffer, 0, buffer.Length);
+                    string textFromFile = Encoding.Default.GetString(buffer);
+
+                    return JsonConvert.DeserializeObject<T>(File.ReadAllText(fileName));
+                }
+            });
+        }
+
+        public static async void SerializeXMLAsync<T>(T obj, string fileName)
+        {
+            await Task.Run(() =>
+            {
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(T));
+                using (FileStream fs = new FileStream(fileName, FileMode.OpenOrCreate))
+                {
+                    xmlSerializer.Serialize(fs, obj);
+                }
+            });
+        }
+
+        public static async Task<T?> DeSerializeXMLAsync<T>(string fileName)
+        {
+            return await Task.Run(() =>
+            {
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(T));
+                using (FileStream fs = new FileStream(fileName, FileMode.OpenOrCreate))
+                {
+                    return (T)xmlSerializer.Deserialize(fs);
+                }
+            });
+        }
+
+        public static async void SerializeBinAsync<T>(T obj, string fileName)
+        {
+            await Task.Run(() =>
+            {
+                BinaryFormatter binaryFormatter = new BinaryFormatter();
+                using (FileStream fs = new FileStream(fileName, FileMode.OpenOrCreate))
+                {
+                    binaryFormatter.Serialize(fs, obj);
+                }
+            });
+        }
+
+        public static async Task<T?> DeSerializeBinAsync<T>(string fileName)
+        {
+            return await Task.Run(() =>
+            {
+                BinaryFormatter binaryFormatter = new BinaryFormatter();
+                using (FileStream fs = new FileStream(fileName, FileMode.OpenOrCreate))
+                {
+                    return (T)binaryFormatter.Deserialize(fs);
+                }
             });
         }
     }
